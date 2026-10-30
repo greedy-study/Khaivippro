@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Thống Chung Sức Liên Quân</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #0f172a;
+            color: #f8fafc;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* Thanh chuyển đổi giao diện (Role Switcher) */
+        .role-switcher {
+            background-color: #1e293b;
+            padding: 8px;
+            border-radius: 30px;
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            border: 1px solid #334155;
+        }
+
+        .role-btn {
+            padding: 10px 24px;
+            border: none;
+            border-radius: 20px;
+            background: transparent;
+            color: #94a3b8;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .role-btn.active {
+            background-color: #0284c7;
+            color: #ffffff;
+            box-shadow: 0 0 12px rgba(2, 132, 199, 0.5);
+        }
+
+        /* Container chính */
+        .container {
+            width: 100%;
+            max-width: 650px;
+            background-color: #1e293b;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+            border: 1px solid #334155;
+        }
+
+        .view-panel {
+            display: none;
+        }
+
+        .view-panel.active {
+            display: block;
+        }
+
+        h2 {
+            color: #38bdf8;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        /* Form nhập liệu */
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            color: #cbd5e1;
+            font-size: 14px;
+        }
+
+        input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            background-color: #0f172a;
+            border: 1px solid #475569;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 15px;
+        }
+
+        button.btn-primary {
+            width: 100%;
+            padding: 12px;
+            background-color: #0284c7;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 10px;
+        }
+
+        button.btn-primary:hover {
+            background-color: #0369a1;
+        }
+
+        /* Danh sách thẻ mã */
+        .card-list {
+            margin-top: 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .card {
+            background-color: #0f172a;
+            padding: 16px;
+            border-radius: 10px;
+            border: 1px solid #334155;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .code-tag {
+            font-size: 18px;
+            font-weight: bold;
+            color: #f59e0b;
+        }
+
+        .badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .badge-pending { background-color: #854d0e; color: #fef08a; }
+        .badge-done { background-color: #166534; color: #bbf7d0; }
+
+        /* Thanh tiến độ (Progress Bar) */
+        .progress-box {
+            margin: 10px 0;
+        }
+
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            color: #94a3b8;
+            margin-bottom: 5px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background-color: #334155;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: #38bdf8;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        /* Nút thao tác của Admin */
+        .admin-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .btn-add { background-color: #10b981; color: white; }
+        .btn-delete { background-color: #ef4444; color: white; }
+    </style>
+</head>
+<body>
+
+    <!-- Thanh chuyển đổi vai trò -->
+    <div class="role-switcher">
+        <button class="role-btn active" onclick="switchRole('user')">📱 Giao Diện Người Dùng</button>
+        <button class="role-btn" onclick="switchRole('admin')">⚙️ Giao Diện Chủ Web (Admin)</button>
+    </div>
+
+    <div class="container">
+        
+        <!-- GIAO DIỆN NGƯỜI DÙNG -->
+        <div id="userPanel" class="view-panel active">
+            <h2>Gửi Mã Chung Sức</h2>
+            
+            <div class="form-group">
+                <label for="userCode">Mã chung sức của bạn:</label>
+                <input type="text" id="userCode" placeholder="Ví dụ: LQUAN123XYZ">
+            </div>
+
+            <div class="form-group">
+                <label for="ticketAmount">Số lượng vé muốn nhận:</label>
+                <input type="number" id="ticketAmount" min="1" max="100" value="5">
+            </div>
+
+            <button class="btn-primary" onclick="submitCode()">Gửi Mã Ngay</button>
+
+            <h3 style="margin-top: 30px; color: #cbd5e1;">Danh Sách Mã Đang Chạy</h3>
+            <div id="userCodeList" class="card-list">
+                <!-- Mã hiển thị ở đây -->
+            </div>
+        </div>
+
+        <!-- GIAO DIỆN CHỦ WEB (ADMIN) -->
+        <div id="adminPanel" class="view-panel">
+            <h2>Quản Lý Mã Chung Sức</h2>
+            <p style="text-align: center; color: #94a3b8; font-size: 14px; margin-bottom: 20px;">
+                Cập nhật tiến độ số vé đã giúp cho từng người dùng tại đây.
+            </p>
+
+            <div id="adminCodeList" class="card-list">
+                <!-- Mã hiển thị ở đây -->
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Mảng lưu trữ dữ liệu danh sách mã
+        let codeData = [
+            { id: 1, code: "LQUAN888", target: 10, current: 4, status: "pending" }
+        ];
+
+        // Chuyển đổi giữa 2 giao diện
+        function switchRole(role) {
+            const buttons = document.querySelectorAll('.role-btn');
+            const panels = document.querySelectorAll('.view-panel');
+
+            buttons.forEach(btn => btn.classList.remove('active'));
+            panels.forEach(panel => panel.classList.remove('active'));
+
+            if (role === 'user') {
+                buttons[0].classList.add('active');
+                document.getElementById('userPanel').classList.add('active');
+            } else {
+                buttons[1].classList.add('active');
+                document.getElementById('adminPanel').classList.add('active');
+            }
+            render();
+        }
+
+        // Người dùng gửi mã mới
+        function submitCode() {
+            const codeInput = document.getElementById('userCode');
+            const ticketInput = document.getElementById('ticketAmount');
+
+            const code = codeInput.value.trim();
+            const target = parseInt(ticketInput.value);
+
+            if (!code || isNaN(target) || target <= 0) {
+                alert("Vui lòng nhập đầy đủ mã và số lượng vé hợp lệ!");
+                return;
+            }
+
+            const newItem = {
+                id: Date.now(),
+                code: code,
+                target: target,
+                current: 0,
+                status: "pending"
+            };
+
+            codeData.unshift(newItem);
+            codeInput.value = '';
+            ticketInput.value = '5';
+            
+            render();
+            alert("Đã gửi mã thành công! Chủ web sẽ hỗ trợ bạn sớm nhất.");
+        }
+
+        // Admin cộng 1 vé tiến độ
+        function addProgress(id) {
+            const item = codeData.find(x => x.id === id);
+            if (item && item.current < item.target) {
+                item.current += 1;
+                if (item.current >= item.target) {
+                    item.status = "done";
+                }
+                render();
+            }
+        }
+
+        // Admin xóa mã
+        function deleteCode(id) {
+            codeData = codeData.filter(x => x.id !== id);
+            render();
+        }
+
+        // Hàm render (vẽ lại giao diện dựa trên dữ liệu)
+        function render() {
+            const userList = document.getElementById('userCodeList');
+            const adminList = document.getElementById('adminCodeList');
